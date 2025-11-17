@@ -1,0 +1,88 @@
+PIXEL_MEAN:
+- 0.406  # 103.53
+- 0.456  # 116.28
+- 0.485  # 123.675
+PIXEL_STD:
+- 0.225  # 57.375
+- 0.224  # 57.12
+- 0.229  # 58.395
+dataset:
+  visual_genome:
+    # Download from https://github.com/danfeiX/scene-graph-TF-release
+    path_imdb: ./dataset/VisualGenome_v1.4/imdb_1024.h5
+    path_sgg: ./dataset/VisualGenome_v1.4/VG-SGG.h5
+    path_category: ./dataset/VisualGenome_v1.4/VG-SGG-dicts.json
+  VGFO:
+    # Download from https://github.com/anonymous9039/SGL_data
+    path_imdb: ./dataset/VisualGenome_v1.4/imdb_1024.h5
+    path_train_sg: ./dataset/vl-mpag/localization_VGFO_vg150vr40_train.json
+    path_test_sg: ./dataset/vl-mpag/localization_VGFO_vg150vr40_test.json
+    path_category: ./dataset/vl-mpag/category_names.json
+  VGPO:
+    # Download from https://github.com/anonymous9039/SGL_data
+    path_imdb: ./dataset/VisualGenome_v1.4/imdb_1024.h5
+    path_train_sg: ./dataset/vl-mpag/localization_VGPO_vg150vr40_similar25_train.json
+    path_test_sg: ./dataset/vl-mpag/localization_VGPO_vg150vr40_similar25_test.json
+    path_category: ./dataset/vl-mpag/category_names.json
+  COCOStuff:
+    # Run https://github.com/google/sg2im/blob/master/sg2im/data/coco.py to make the dataset
+    image_dir_train: ./dataset/MSCOCO/2017/train2017
+    image_dir_val: ./dataset/MSCOCO/2017/val2017
+    path_train_sg: ./dataset/coco-stuff/train.json
+    path_val_sg: ./dataset/coco-stuff/val.json
+    path_category: ./dataset/coco-stuff/category_names.json
+  GQA_SceneGraph:
+    # Download from https://cs.stanford.edu/people/dorarad/gqa/download.html
+    image_dir: ./dataset/GQA/images/images
+    path_train_sg: ./dataset/GQA/train_sceneGraphs.json
+    path_val_sg: ./dataset/GQA/val_sceneGraphs.json
+  using_dataset: VGFO  # visual_genome, VGFO, VGPO, COCOStuff, or GQA_SceneGraph
+save_path: OUTPUT/VGFO
+max_nmsed_per_img: 512
+nms_thresh: 0.7
+num_transformer_layers: 2
+
+train:
+  batch_size: 2  # per GPU
+  grad_accumulation_steps: 5  # the effective batch size is batch_size * grad_accumulation_steps * num_gpus
+  category_drop_rate: 0.2
+  interbatch: True
+  object_classification_loss: sigmoid_cross_entropy
+
+  data_augmentation:
+    drop_node:
+      max_n: 30
+    color_jitter:
+      brightness: 0.5
+      contrast: 0.4
+      hue: 0.2
+      prob: 0.95
+      saturation: 0.4
+    flip:
+      prob: 0.5  # make sure to set this to 0.0 for GQA because GQA includes left/right relationships
+    gaussian_noise:
+      prob: 0.9
+      sigma: 0.2
+    resize:
+      aspect_shift: 0.8
+      max_scale: 1.1
+      min_scale: 0.6
+      prob: 0.95
+      base_long_side: 1024  # 1024 is the common setting for Visual Genome
+
+  loss_weights:
+    object_detection:
+      boxclassification: 0.02
+      objectness: 0.01
+      regression: 0.01
+    graph_matching:
+      wholebox:
+        belief_propagation: 0.5
+      boxgiven:
+        belief_propagation: 0.5
+    scene_classification: 0.1
+
+  lr: 0.0001
+  max_iter: 50000
+  pretrained_model: ./glip_a_tiny_o365.pth  # https://huggingface.co/GLIPModel/GLIP/resolve/main/glip_a_tiny_o365.pth
+  save_freq_iter: 5000
