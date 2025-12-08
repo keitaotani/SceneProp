@@ -12,7 +12,7 @@
 
 <h3 align="center">
     WACV 2026
-    <!--<a href="https://openaccess.thecvf.com/content/WACV2026/html/Otani_SceneProp_Combining_Neural_Network_and_Markov_Random_Field_for_Scene-Graph_Grounding_WACV_2026_paper.html">[Paper]</a>-->
+    [<a href="https://www.arxiv.org/abs/2512.00936">Paper</a>]
 </h3>
 
 <div align="center">
